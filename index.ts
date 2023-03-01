@@ -8,6 +8,7 @@ const io = require("socket.io")(8000, {
 const SocketEvent = {
   NEW_USER: "new-user",
   NEW_MESSAGE: "new-message",
+  NEW_NOTIFICATION: "new-notification",
 };
 
 let users = [];
@@ -31,7 +32,6 @@ io.on("connection", (socket) => {
 
   //take userId and socketId from user
   socket.on(SocketEvent.NEW_USER, (userId) => {
-    console.log(SocketEvent.NEW_USER, userId);
     addUser(+userId, socket.id);
 
     // io.emit("GET_USERS", users);
@@ -46,6 +46,16 @@ io.on("connection", (socket) => {
     }
 
     io.to(user.socketId).emit(SocketEvent.NEW_MESSAGE, message);
+  });
+
+  socket.on(SocketEvent.NEW_NOTIFICATION, (notifierId) => {
+    const user = getUser(notifierId);
+
+    if (!user) {
+      return;
+    }
+
+    io.to(user.socketId).emit(SocketEvent.NEW_NOTIFICATION);
   });
 
   //when disconnect
