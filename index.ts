@@ -33,8 +33,6 @@ io.on("connection", (socket) => {
   //take userId and socketId from user
   socket.on(SocketEvent.NEW_USER, (userId) => {
     addUser(+userId, socket.id);
-
-    // io.emit("GET_USERS", users);
   });
 
   //send and get message
@@ -62,6 +60,5 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("a user disconnected!");
     removeUser(socket.id);
-    // io.emit("GET_USERS", users);
   });
 });
