@@ -9,6 +9,9 @@ const SocketEvent = {
   NEW_USER: "new-user",
   NEW_MESSAGE: "new-message",
   NEW_NOTIFICATION: "new-notification",
+  NEW_FRIENDSHIP_REQUEST: "new-friendship-request",
+  FRIENDSHIP_REMOVED: "friendship-removed",
+  FRIENDSHIP_STATUS_CHANGED: "friendship-status-changed",
 };
 
 let users = [];
@@ -46,14 +49,51 @@ io.on("connection", (socket) => {
     io.to(user.socketId).emit(SocketEvent.NEW_MESSAGE, message);
   });
 
-  socket.on(SocketEvent.NEW_NOTIFICATION, (notifierId) => {
+  socket.on(SocketEvent.NEW_NOTIFICATION, (notification) => {
+    const { notifierId, ...rest } = notification;
     const user = getUser(notifierId);
 
     if (!user) {
       return;
     }
 
-    io.to(user.socketId).emit(SocketEvent.NEW_NOTIFICATION);
+    io.to(user.socketId).emit(SocketEvent.NEW_NOTIFICATION, rest);
+  });
+
+  socket.on(SocketEvent.NEW_FRIENDSHIP_REQUEST, (friendshipData) => {
+    const user = getUser(friendshipData.receiverId);
+
+    if (!user) {
+      return;
+    }
+
+    io.to(user.socketId).emit(
+      SocketEvent.NEW_FRIENDSHIP_REQUEST,
+      friendshipData
+    );
+  });
+
+  socket.on(SocketEvent.FRIENDSHIP_REMOVED, (friendshipData) => {
+    const user = getUser(friendshipData.receiverId);
+
+    if (!user) {
+      return;
+    }
+
+    io.to(user.socketId).emit(SocketEvent.FRIENDSHIP_REMOVED, friendshipData);
+  });
+
+  socket.on(SocketEvent.FRIENDSHIP_STATUS_CHANGED, (friendshipData) => {
+    const user = getUser(friendshipData.senderId);
+
+    if (!user) {
+      return;
+    }
+
+    io.to(user.socketId).emit(
+      SocketEvent.FRIENDSHIP_STATUS_CHANGED,
+      friendshipData
+    );
   });
 
   //when disconnect
